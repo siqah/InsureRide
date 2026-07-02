@@ -7,8 +7,8 @@ import lombok.Data;
 public class PaymentResponseDTO {
     private String workerName;
     private String phoneNumber; 
-    private BigDecimal amountpaid;
-    private LocalDateTime newExpiryTime;
+    private BigDecimal amountPaid;
+    private LocalDateTime nextExpiryTime;
     private String message; //"coverage extended to [Expiry Date and Time]"
 
 
