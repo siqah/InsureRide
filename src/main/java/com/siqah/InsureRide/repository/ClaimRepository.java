@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.siqah.InsureRide.entity.Claim;
 
 public interface ClaimRepository extends JpaRepository<Claim, Long> {
-    List<Claim> findByWorkerid(Long WorkerId);
-    List<Claim> findByHospital(Long hospitalId);
-
+    List<Claim> findByWorkerId(Long workerId);
+    List<Claim> findByHospitalId(Long hospitalId);
 }

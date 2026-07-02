@@ -34,6 +34,8 @@ public class Worker {
     @Enumerated(EnumType.STRING)
     private CoverageStatus coverageStatus;
 
+    private LocalDateTime coverageExpiry;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
