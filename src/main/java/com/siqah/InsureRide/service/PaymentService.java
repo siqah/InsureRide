@@ -11,6 +11,7 @@ import com.siqah.InsureRide.entity.Payment;
 import jakarta.transaction.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
@@ -70,7 +71,11 @@ public class PaymentService {
 
         return response;
     }
-   
-    
 
+    //get all payments for a worker (for dashboard)
+    public List<Payment> getWorkerPayments(String phoneNumber) {
+        Worker worker = workerRepository.findByPhoneNumber(phoneNumber)
+               .orElseThrow(() -> new RuntimeException("Worker not found"));
+        return paymentRepository.findByWorkerIdOrderByPaymentDateDesc(worker.getId());
+    }
 }
