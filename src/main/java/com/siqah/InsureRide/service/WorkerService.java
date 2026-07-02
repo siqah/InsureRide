@@ -65,6 +65,7 @@ public class WorkerService {
     //delete worker
     public void deleteWorker(Long workerId){
         workerRepository.deleteById(workerId);
+
     }
 
 }

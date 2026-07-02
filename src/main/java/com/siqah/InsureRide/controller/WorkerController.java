@@ -1,10 +1,10 @@
 package com.siqah.InsureRide.controller;
 
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 
 
 import com.siqah.InsureRide.service.WorkerService;
-import com.siqah.InsureRide.entity.CoverageStatus;
 import com.siqah.InsureRide.dto.WorkerDTO;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 
@@ -27,10 +28,8 @@ public class WorkerController {
     private final WorkerService workerService;
 
     @PostMapping("/register")
-    public ResponseEntity<WorkerDTO> registerWorker(
-           @RequestParam String name,
-           @RequestParam String phoneNumber) {
-        WorkerDTO worker = workerService.registerWorker(name, phoneNumber);
+    public ResponseEntity<WorkerDTO> registerWorker(@RequestBody WorkerDTO request) {
+        WorkerDTO worker = workerService.registerWorker(request.getName(), request.getPhoneNumber());
         return new ResponseEntity<>(worker, HttpStatus.CREATED);
     }
 
@@ -47,14 +46,16 @@ public class WorkerController {
     @PutMapping("/{workerId}/status")
     public ResponseEntity<WorkerDTO> updateStatus(
            @PathVariable Long workerId,
-           @RequestParam CoverageStatus newStatus){
-        return ResponseEntity.ok(workerService.updateWorkerStatus(workerId, newStatus));    
+           @RequestBody WorkerDTO request){
+        return ResponseEntity.ok(workerService.updateWorkerStatus(workerId, request.getCoverageStatus()));    
     }
     
     @DeleteMapping("/{workerId}")
-    public ResponseEntity<Void> deleteWorker(@PathVariable Long workerId){
+    public ResponseEntity<Map<String, String>> deleteWorker(@PathVariable Long workerId){
         workerService.deleteWorker(workerId);
-        return ResponseEntity.noContent().build();
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Worker deleted successfully");
+        return ResponseEntity.ok(response);
     }
     
     

@@ -1,5 +1,4 @@
 package com.siqah.InsureRide.service;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import com.siqah.InsureRide.repository.HospitalRepository;
 import com.siqah.InsureRide.dto.HospitalResponseDTO;
@@ -8,9 +7,10 @@ import com.siqah.InsureRide.dto.HospitalRegistrationDTO;
 import java.util.UUID;
 
 
+import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
-@Data
+@Service
 @RequiredArgsConstructor
 public class HospitalService {
     private final HospitalRepository hospitalRepository;
