@@ -7,7 +7,7 @@ import java.util.Optional;
 import com.siqah.InsureRide.entity.Hospital;
 
 @Repository
-public interface HospitalRepostory extends JpaRepository<Hospital, Long> {
+public interface HospitalRepository extends JpaRepository<Hospital, Long> {
     Optional<Hospital> findByApikey(String apikey);
     Optional<Hospital> findByName(String name);
 
