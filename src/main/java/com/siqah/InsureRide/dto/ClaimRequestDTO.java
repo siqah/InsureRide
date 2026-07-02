@@ -7,6 +7,6 @@ import lombok.Data;
 @Data
 public class ClaimRequestDTO {
     private String workerPhoneNumber;
-    private BigDecimal billAmoount;
+    private BigDecimal billAmount;
 
 }
