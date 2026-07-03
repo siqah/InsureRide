@@ -5,7 +5,7 @@ import ClaimHistory from './ClaimHistory';
 import { KeyIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 const HospitalDashboard = () => {
-  const { apiKey, hospitalName, logout, fetchHospitalInfo } = useAuthStore();
+  const { token, hospitalName, logout, fetchHospitalInfo } = useAuthStore();
   const [activeTab, setActiveTab] = useState('verify');
 
   useEffect(() => {
@@ -29,7 +29,7 @@ const HospitalDashboard = () => {
             <div className="flex items-center text-sm font-semibold text-gray-500 bg-gray-100 px-3 py-1.5 rounded">
               <KeyIcon className="h-4 w-4 mr-1.5 text-gray-400" />
               <span className="font-mono text-xs text-primary">
-                {apiKey.substring(0, 12)}...{apiKey.substring(apiKey.length - 8)}
+                {token ? `${token.substring(0, 12)}...${token.substring(token.length - 8)}` : 'N/A'}
               </span>
             </div>
             <button

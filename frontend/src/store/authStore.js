@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import { hospitalApi } from '../api/hospitalApi';
 
 export const useAuthStore = create((set, get) => ({
-  apiKey: localStorage.getItem('hospitalApiKey') || '',
-  isAuthenticated: !!localStorage.getItem('hospitalApiKey'),
+  token: localStorage.getItem('hospitalJwtToken') || '',
+  isAuthenticated: !!localStorage.getItem('hospitalJwtToken'),
   hospitalName: null,
   loading: false,
   error: null,
@@ -11,32 +11,39 @@ export const useAuthStore = create((set, get) => ({
   login: async (apiKey) => {
     set({ loading: true, error: null });
     try {
-      // Set temporary item in localStorage so the request interceptor can attach it
-      localStorage.setItem('hospitalApiKey', apiKey);
-      const response = await hospitalApi.getMe();
+      // 1. Submit API key to get JWT token
+      const loginResponse = await hospitalApi.login(apiKey);
+      const { token } = loginResponse.data;
+
+      // 2. Save token to localStorage so interceptor can attach it
+      localStorage.setItem('hospitalJwtToken', token);
+
+      // 3. Retrieve hospital name/details using JWT authentication
+      const meResponse = await hospitalApi.getMe();
+      
       set({
-        apiKey,
+        token,
         isAuthenticated: true,
-        hospitalName: response.data.name,
+        hospitalName: meResponse.data.name,
         loading: false,
       });
     } catch (err) {
-      localStorage.removeItem('hospitalApiKey');
+      localStorage.removeItem('hospitalJwtToken');
       set({
-        apiKey: '',
+        token: '',
         isAuthenticated: false,
         hospitalName: null,
         loading: false,
-        error: err.response?.data?.message || 'Invalid API Key',
+        error: err.response?.data?.message || 'Authentication failed. Please check your API Key.',
       });
       throw err;
     }
   },
 
   logout: () => {
-    localStorage.removeItem('hospitalApiKey');
+    localStorage.removeItem('hospitalJwtToken');
     set({
-      apiKey: '',
+      token: '',
       isAuthenticated: false,
       hospitalName: null,
       error: null,
@@ -44,8 +51,8 @@ export const useAuthStore = create((set, get) => ({
   },
 
   fetchHospitalInfo: async () => {
-    const { apiKey } = get();
-    if (!apiKey) return;
+    const { token } = get();
+    if (!token) return;
     set({ loading: true });
     try {
       const response = await hospitalApi.getMe();
