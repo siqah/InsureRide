@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
-import { useAuthContext } from '../../context/AuthContext';
+import React, { useState, useEffect } from 'react';
+import { useAuthStore } from '../../store/authStore';
 import ClaimVerification from './ClaimVerification';
 import ClaimHistory from './ClaimHistory';
 import { KeyIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 
 const HospitalDashboard = () => {
-  const { apiKey, logout } = useAuthContext();
+  const { apiKey, hospitalName, logout, fetchHospitalInfo } = useAuthStore();
   const [activeTab, setActiveTab] = useState('verify');
+
+  useEffect(() => {
+    fetchHospitalInfo();
+  }, [fetchHospitalInfo]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -14,7 +18,9 @@ const HospitalDashboard = () => {
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-black text-primary tracking-tight">🏥 Hospital Portal</h1>
+            <h1 className="text-2xl font-black text-primary tracking-tight">
+              {hospitalName || 'Hospital Portal'}
+            </h1>
             <span className="px-2.5 py-1 bg-green-100 text-green-800 text-xs font-bold uppercase tracking-wider rounded">
               Connected
             </span>

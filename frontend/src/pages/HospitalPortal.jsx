@@ -1,22 +1,26 @@
 import React, { useState } from 'react';
-import { AuthProvider, useAuthContext } from '../context/AuthContext';
+import { useAuthStore } from '../store/authStore';
 import HospitalDashboard from '../components/hospital/HospitalDashboard';
 import HospitalRegistration from '../components/hospital/HospitalRegistration';
 import { ShieldCheckIcon, KeyIcon } from '@heroicons/react/24/outline';
 
-const HospitalPortalInner = () => {
-  const { isAuthenticated, login } = useAuthContext();
+const HospitalPortal = () => {
+  const { isAuthenticated, login, loading, error } = useAuthStore();
   const [mode, setMode] = useState('login'); // 'login' or 'register'
   const [apiKeyInput, setApiKeyInput] = useState('');
-  const [error, setError] = useState('');
+  const [localError, setLocalError] = useState('');
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     if (apiKeyInput.trim()) {
-      login(apiKeyInput.trim());
-      setError('');
+      setLocalError('');
+      try {
+        await login(apiKeyInput.trim());
+      } catch {
+        // Error state handled in the store
+      }
     } else {
-      setError('Please enter a valid API Key');
+      setLocalError('Please enter a valid API Key');
     }
   };
 
@@ -27,6 +31,8 @@ const HospitalPortalInner = () => {
   if (isAuthenticated) {
     return <HospitalDashboard />;
   }
+
+  const activeError = localError || error;
 
   return (
     <div className="flex-1 bg-gray-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -58,14 +64,15 @@ const HospitalPortalInner = () => {
 
             <button
               type="submit"
-              className="w-full bg-primary text-white py-3.5 rounded-lg font-bold hover:bg-opacity-90 transition-all uppercase text-sm tracking-wider"
+              disabled={loading}
+              className="w-full bg-primary text-white py-3.5 rounded-lg font-bold hover:bg-opacity-90 transition-all uppercase text-sm tracking-wider disabled:opacity-50"
             >
-              Verify & Enter
+              {loading ? 'Verifying...' : 'Verify & Enter'}
             </button>
 
-            {error && (
+            {activeError && (
               <div className="mt-4 p-4 bg-red-50 border border-danger rounded-lg text-danger font-semibold text-sm">
-                {error}
+                {activeError}
               </div>
             )}
           </form>
@@ -96,14 +103,6 @@ const HospitalPortalInner = () => {
         </div>
       )}
     </div>
-  );
-};
-
-const HospitalPortal = () => {
-  return (
-    <AuthProvider>
-      <HospitalPortalInner />
-    </AuthProvider>
   );
 };
 

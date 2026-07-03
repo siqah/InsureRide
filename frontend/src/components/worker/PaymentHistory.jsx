@@ -1,28 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { paymentApi } from '../../api/paymentApi';
+import React from 'react';
+import { useWorkerStore } from '../../store/workerStore';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
 const PaymentHistory = ({ phoneNumber }) => {
-  const [payments, setPayments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { payments, loading, error, fetchWorkerByPhone } = useWorkerStore();
 
-  useEffect(() => {
+  const handleRefresh = async () => {
     if (phoneNumber) {
-      fetchPaymentHistory();
-    }
-  }, [phoneNumber]);
-
-  const fetchPaymentHistory = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await paymentApi.getWorkerPayments(phoneNumber);
-      setPayments(response.data);
-    } catch (err) {
-      setError('Failed to load payment history');
-    } finally {
-      setLoading(false);
+      try {
+        await fetchWorkerByPhone(phoneNumber);
+      } catch {
+        // Handled in store
+      }
     }
   };
 
@@ -39,7 +28,7 @@ const PaymentHistory = ({ phoneNumber }) => {
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-xl font-black text-primary">Payment History</h3>
         <button
-          onClick={fetchPaymentHistory}
+          onClick={handleRefresh}
           className="text-primary hover:text-secondary transition-colors"
           title="Refresh History"
         >

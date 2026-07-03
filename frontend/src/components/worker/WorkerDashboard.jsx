@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { workerApi } from '../../api/workerApi';
+import React, { useState, useEffect } from 'react';
+import { useWorkerStore } from '../../store/workerStore';
 import CoverageCard from './CoverageCard';
 import PaymentForm from './PaymentForm';
 import PaymentHistory from './PaymentHistory';
@@ -7,35 +7,26 @@ import { UserPlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 const WorkerDashboard = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [worker, setWorker] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [showRegister, setShowRegister] = useState(false);
+  const { worker, loading, error, fetchWorkerByPhone, registerWorker, clearWorker } = useWorkerStore();
 
-  const fetchWorker = async (phone) => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await workerApi.getByPhone(phone);
-      setWorker(response.data);
-      setShowRegister(false);
-    } catch (err) {
-      if (err.response?.status === 500 || err.response?.status === 404) {
-        setShowRegister(true);
-        setError('Worker not found. Would you like to register?');
-      } else {
-        setError('Failed to fetch worker details');
-      }
-      setWorker(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    return () => {
+      clearWorker();
+    };
+  }, [clearWorker]);
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
     if (phoneNumber.trim()) {
-      fetchWorker(phoneNumber.trim());
+      setShowRegister(false);
+      try {
+        await fetchWorkerByPhone(phoneNumber.trim());
+      } catch (err) {
+        if (err.response?.status === 404 || err.response?.status === 500) {
+          setShowRegister(true);
+        }
+      }
     }
   };
 
@@ -44,13 +35,11 @@ const WorkerDashboard = () => {
     if (!name) return;
 
     try {
-      const response = await workerApi.register(name, phoneNumber);
-      setWorker(response.data);
+      await registerWorker(name, phoneNumber);
       setShowRegister(false);
-      setError('');
       alert('✅ Registration successful! Now make your first payment.');
-    } catch (err) {
-      setError('Registration failed. Please try again.');
+    } catch {
+      // Handled in store
     }
   };
 

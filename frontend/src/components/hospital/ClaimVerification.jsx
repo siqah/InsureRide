@@ -1,28 +1,25 @@
-import React, { useState } from 'react';
-import { claimApi } from '../../api/claimApi';
+import React, { useState, useEffect } from 'react';
+import { useClaimStore } from '../../store/claimStore';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import { ShieldCheckIcon } from '@heroicons/react/24/outline';
 
 const ClaimVerification = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [amount, setAmount] = useState('');
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const { verificationResult, loading, error, verifyClaim, clearVerificationResult } = useClaimStore();
+
+  useEffect(() => {
+    return () => {
+      clearVerificationResult();
+    };
+  }, [clearVerificationResult]);
 
   const handleVerify = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-    setResult(null);
-
     try {
-      const response = await claimApi.verify(phoneNumber, parseFloat(amount));
-      setResult(response.data);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Verification failed. Make sure your API Key is valid.');
-    } finally {
-      setLoading(false);
+      await verifyClaim(phoneNumber, amount);
+    } catch {
+      // Handled in store
     }
   };
 
@@ -82,33 +79,33 @@ const ClaimVerification = () => {
         </div>
       )}
 
-      {result && (
+      {verificationResult && (
         <div className={`mt-6 p-6 rounded-lg border-2 ${
-          result.isCovered 
+          verificationResult.isCovered 
             ? 'border-success bg-green-50' 
             : 'border-danger bg-red-50'
         }`}>
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div>
               <h3 className="text-lg font-black text-primary">
-                {result.workerName} ({result.workerPhone})
+                {verificationResult.workerName} ({verificationResult.workerPhone})
               </h3>
               <div className="mt-2">
                 <span className={`inline-flex items-center px-3 py-1 rounded text-xs font-black uppercase tracking-wider text-white ${
-                  result.isCovered 
+                  verificationResult.isCovered 
                     ? 'bg-success' 
                     : 'bg-danger'
                 }`}>
-                  {result.isCovered ? (
+                  {verificationResult.isCovered ? (
                     <CheckCircleIcon className="h-4 w-4 mr-1.5" />
                   ) : (
                     <XCircleIcon className="h-4 w-4 mr-1.5" />
                   )}
-                  {result.status}
+                  {verificationResult.status}
                 </span>
               </div>
-              <p className={`mt-2 font-semibold ${result.isCovered ? 'text-green-900' : 'text-red-900'}`}>
-                {result.message}
+              <p className={`mt-2 font-semibold ${verificationResult.isCovered ? 'text-green-900' : 'text-red-900'}`}>
+                {verificationResult.message}
               </p>
             </div>
             <div className="sm:text-right">

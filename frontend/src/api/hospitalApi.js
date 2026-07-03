@@ -8,4 +8,7 @@ export const hospitalApi = {
       contactEmail,
       phoneNumber,
     }),
+  
+  // Get details of currently authenticated hospital
+  getMe: () => API.get('/hospitals/me'),
 };

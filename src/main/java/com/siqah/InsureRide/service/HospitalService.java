@@ -50,9 +50,15 @@ public class HospitalService {
                .map(hospital -> hospital.getIsActive())
                .orElse(false);
     }
-    
-        
-    
 
-    
+    public HospitalResponseDTO getHospitalDetails(String apiKey) {
+        Hospital hospital = hospitalRepository.findByApikey(apiKey)
+               .orElseThrow(() -> new RuntimeException("Hospital not found or invalid API Key"));
+        
+        HospitalResponseDTO response = new HospitalResponseDTO();
+        response.setId(hospital.getId());
+        response.setName(hospital.getName());
+        response.setApikey(null); // Omit key in responses
+        return response;
+    }
 }

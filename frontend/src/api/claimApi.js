@@ -7,4 +7,7 @@ export const claimApi = {
       workerPhoneNumber,
       billAmount,
     }),
+
+  // Get hospital claims history
+  getHistory: () => API.get('/claims'),
 };

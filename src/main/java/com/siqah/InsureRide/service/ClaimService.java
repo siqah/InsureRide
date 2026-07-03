@@ -12,7 +12,13 @@ import com.siqah.InsureRide.entity.CoverageStatus;
 import com.siqah.InsureRide.entity.Claim;
 import com.siqah.InsureRide.entity.ClaimStatus;
 
+import com.siqah.InsureRide.repository.HospitalRepository;
+import com.siqah.InsureRide.entity.Hospital;
+import com.siqah.InsureRide.dto.ClaimHistoryResponseDTO;
+
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -21,9 +27,14 @@ public class ClaimService {
     
     private final WorkerRepository workerRepository;
     private final ClaimRepository claimRepository;
+    private final HospitalRepository hospitalRepository;
 
     @Transactional
-    public ClaimResponseDTO verifyClaim(Long hospitalId, ClaimRequestDTO request) {
+    public ClaimResponseDTO verifyClaim(String apiKey, ClaimRequestDTO request) {
+        // Resolve the hospital by its API key
+        Hospital hospital = hospitalRepository.findByApikey(apiKey)
+                .orElseThrow(() -> new RuntimeException("Invalid API Key"));
+
         //1 find the worker
         Worker worker = workerRepository.findByPhoneNumber(request.getWorkerPhoneNumber())
                 .orElseThrow(() -> new RuntimeException("Worker not found"));
@@ -35,7 +46,7 @@ public class ClaimService {
         //3 create claim record
         Claim claim = new Claim();
         claim.setWorkerId(worker.getId());
-        claim.setHospitalId(hospitalId);
+        claim.setHospitalId(hospital.getId());
         claim.setClaimAmount(request.getBillAmount());
         claim.setClaimStatus(isCovered ? ClaimStatus.APPROVED : ClaimStatus.REJECTED);
         if (!isCovered) {
@@ -51,5 +62,27 @@ public class ClaimService {
         response.setStatus(isCovered ? "approved" : "denied");
         response.setMessage(isCovered ? "Coverage active - claim approved" : "worker suspended or coverage expired");
         return response;
+    }
+
+    public List<ClaimHistoryResponseDTO> getClaimHistory(String apiKey) {
+        Hospital hospital = hospitalRepository.findByApikey(apiKey)
+                .orElseThrow(() -> new RuntimeException("Invalid API Key"));
+
+        List<Claim> claims = claimRepository.findByHospitalId(hospital.getId());
+
+        return claims.stream().map(claim -> {
+            ClaimHistoryResponseDTO dto = new ClaimHistoryResponseDTO();
+            dto.setId(claim.getId());
+            dto.setAmount(claim.getClaimAmount());
+            dto.setStatus(claim.getClaimStatus() == ClaimStatus.APPROVED ? "APPROVED" : "DENIED");
+            dto.setDate(claim.getClaimDate());
+
+            workerRepository.findById(claim.getWorkerId()).ifPresent(worker -> {
+                dto.setWorkerName(worker.getName());
+                dto.setWorkerPhone(worker.getPhoneNumber());
+            });
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 }

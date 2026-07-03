@@ -1,39 +1,19 @@
 import React, { useState } from 'react';
-import { paymentApi } from '../../api/paymentApi';
+import { useWorkerStore } from '../../store/workerStore';
 import { CurrencyDollarIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 
-const PaymentForm = ({ phoneNumber, onPaymentSuccess }) => {
+const PaymentForm = ({ phoneNumber }) => {
   const [amount, setAmount] = useState(20);
   const [reference, setReference] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const { processPayment, loading, error, success } = useWorkerStore();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess('');
-
     try {
-      const txRef = reference || `MPESA-${Date.now()}`;
-      
-      const response = await paymentApi.processPayment(
-        phoneNumber,
-        amount,
-        txRef
-      );
-
-      setSuccess(`✅ ${response.data.message}`);
+      await processPayment(phoneNumber, amount, reference);
       setReference('');
-      
-      if (onPaymentSuccess) {
-        onPaymentSuccess();
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Payment failed. Please try again.');
-    } finally {
-      setLoading(false);
+    } catch {
+      // Handled in store
     }
   };
 
@@ -111,7 +91,7 @@ const PaymentForm = ({ phoneNumber, onPaymentSuccess }) => {
 
         {success && (
           <div className="mt-4 p-4 bg-green-50 border border-success rounded-lg text-green-800 font-semibold">
-            {success}
+            {success.startsWith('✅') ? success : `✅ ${success}`}
           </div>
         )}
       </form>

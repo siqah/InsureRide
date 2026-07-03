@@ -9,7 +9,7 @@ const Navbar = () => {
           <div className="flex">
             <Link to="/" className="flex-shrink-0 flex items-center gap-2">
               <span className="text-xl font-extrabold text-primary tracking-tight">
-                🛵 InsureRide
+                InsureRide
               </span>
             </Link>
             <div className="hidden sm:ml-8 sm:flex sm:space-x-4 items-center">
