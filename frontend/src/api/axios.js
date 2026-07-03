@@ -1,8 +1,18 @@
 import axios from 'axios';
 
-// Create axios instance with base URL mapping to Spring Boot backend
+// Get sanitized and formatted base URL
+const getBaseURL = () => {
+  let url = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+  // Trim trailing slash
+  if (url.endsWith('/')) {
+    url = url.slice(0, -1);
+  }
+  // Ensure it ends with /api
+  return url.endsWith('/api') ? url : `${url}/api`;
+};
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
+  baseURL: getBaseURL(),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
