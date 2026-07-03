@@ -4,6 +4,8 @@ import com.siqah.InsureRide.repository.HospitalRepository;
 import com.siqah.InsureRide.dto.HospitalResponseDTO;
 import com.siqah.InsureRide.entity.Hospital;
 import com.siqah.InsureRide.dto.HospitalRegistrationDTO;
+import com.siqah.InsureRide.config.JwtService;
+import com.siqah.InsureRide.config.HospitalUserDetails;
 import java.util.UUID;
 
 
@@ -14,6 +16,7 @@ import jakarta.transaction.Transactional;
 @RequiredArgsConstructor
 public class HospitalService {
     private final HospitalRepository hospitalRepository;
+    private final JwtService jwtService;
 
     @Transactional
     public HospitalResponseDTO registerHospital(HospitalRegistrationDTO request){
@@ -51,6 +54,17 @@ public class HospitalService {
                .orElse(false);
     }
 
+    public String login(String apiKey) {
+        Hospital hospital = hospitalRepository.findByApikey(apiKey)
+                .orElseThrow(() -> new RuntimeException("Invalid API Key"));
+
+        if (!hospital.getIsActive()) {
+            throw new RuntimeException("Hospital account is suspended");
+        }
+
+        return jwtService.generateToken(new HospitalUserDetails(hospital));
+    }
+
     public HospitalResponseDTO getHospitalDetails(String apiKey) {
         Hospital hospital = hospitalRepository.findByApikey(apiKey)
                .orElseThrow(() -> new RuntimeException("Hospital not found or invalid API Key"));
@@ -59,6 +73,17 @@ public class HospitalService {
         response.setId(hospital.getId());
         response.setName(hospital.getName());
         response.setApikey(null); // Omit key in responses
+        return response;
+    }
+
+    public HospitalResponseDTO getHospitalDetailsById(Long id) {
+        Hospital hospital = hospitalRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Hospital not found"));
+
+        HospitalResponseDTO response = new HospitalResponseDTO();
+        response.setId(hospital.getId());
+        response.setName(hospital.getName());
+        response.setApikey(null);
         return response;
     }
 }

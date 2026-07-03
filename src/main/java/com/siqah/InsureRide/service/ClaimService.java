@@ -11,9 +11,6 @@ import com.siqah.InsureRide.entity.Worker;
 import com.siqah.InsureRide.entity.CoverageStatus;
 import com.siqah.InsureRide.entity.Claim;
 import com.siqah.InsureRide.entity.ClaimStatus;
-
-import com.siqah.InsureRide.repository.HospitalRepository;
-import com.siqah.InsureRide.entity.Hospital;
 import com.siqah.InsureRide.dto.ClaimHistoryResponseDTO;
 
 import java.time.LocalDateTime;
@@ -27,14 +24,9 @@ public class ClaimService {
     
     private final WorkerRepository workerRepository;
     private final ClaimRepository claimRepository;
-    private final HospitalRepository hospitalRepository;
 
     @Transactional
-    public ClaimResponseDTO verifyClaim(String apiKey, ClaimRequestDTO request) {
-        // Resolve the hospital by its API key
-        Hospital hospital = hospitalRepository.findByApikey(apiKey)
-                .orElseThrow(() -> new RuntimeException("Invalid API Key"));
-
+    public ClaimResponseDTO verifyClaim(Long hospitalId, ClaimRequestDTO request) {
         //1 find the worker
         Worker worker = workerRepository.findByPhoneNumber(request.getWorkerPhoneNumber())
                 .orElseThrow(() -> new RuntimeException("Worker not found"));
@@ -46,7 +38,7 @@ public class ClaimService {
         //3 create claim record
         Claim claim = new Claim();
         claim.setWorkerId(worker.getId());
-        claim.setHospitalId(hospital.getId());
+        claim.setHospitalId(hospitalId);
         claim.setClaimAmount(request.getBillAmount());
         claim.setClaimStatus(isCovered ? ClaimStatus.APPROVED : ClaimStatus.REJECTED);
         if (!isCovered) {
@@ -64,11 +56,8 @@ public class ClaimService {
         return response;
     }
 
-    public List<ClaimHistoryResponseDTO> getClaimHistory(String apiKey) {
-        Hospital hospital = hospitalRepository.findByApikey(apiKey)
-                .orElseThrow(() -> new RuntimeException("Invalid API Key"));
-
-        List<Claim> claims = claimRepository.findByHospitalId(hospital.getId());
+    public List<ClaimHistoryResponseDTO> getClaimHistory(Long hospitalId) {
+        List<Claim> claims = claimRepository.findByHospitalId(hospitalId);
 
         return claims.stream().map(claim -> {
             ClaimHistoryResponseDTO dto = new ClaimHistoryResponseDTO();

@@ -11,4 +11,7 @@ export const hospitalApi = {
   
   // Get details of currently authenticated hospital
   getMe: () => API.get('/hospitals/me'),
+
+  // Authenticate hospital using API key and retrieve JWT
+  login: (apiKey) => API.post('/hospitals/login', { apiKey }),
 };
