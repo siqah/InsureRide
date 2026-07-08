@@ -5,10 +5,16 @@ import { CurrencyDollarIcon, CreditCardIcon } from '@heroicons/react/24/outline'
 const PaymentForm = ({ phoneNumber }) => {
   const [amount, setAmount] = useState(20);
   const [reference, setReference] = useState('');
+  const [localError, setLocalError] = useState('');
   const { processPayment, loading, error, success } = useWorkerStore();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLocalError('');
+    if (Number(amount) !== 20) {
+      setLocalError('Payment amount must be exactly 20.00 KES');
+      return;
+    }
     try {
       await processPayment(phoneNumber, amount, reference);
       setReference('');
@@ -83,9 +89,9 @@ const PaymentForm = ({ phoneNumber }) => {
           )}
         </button>
 
-        {error && (
+        {(localError || error) && (
           <div className="mt-4 p-4 bg-red-50 border border-danger rounded-lg text-danger font-semibold">
-            {error}
+            {localError || error}
           </div>
         )}
 

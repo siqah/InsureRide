@@ -14,6 +14,7 @@ import com.siqah.InsureRide.dto.LoginResponseDTO;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import com.siqah.InsureRide.config.HospitalUserDetails;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,13 +32,13 @@ public class HospitalController {
 
     @PostMapping("/register")
     public ResponseEntity<HospitalResponseDTO> registerHospital(
-             @RequestBody HospitalRegistrationDTO request){
+             @Valid @RequestBody HospitalRegistrationDTO request){
         HospitalResponseDTO response = hospitalService.registerHospital(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO request) {
+    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         String token = hospitalService.login(request.getApiKey());
         return ResponseEntity.ok(new LoginResponseDTO(token));
     }

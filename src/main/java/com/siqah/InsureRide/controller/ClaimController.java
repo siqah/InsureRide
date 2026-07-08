@@ -15,6 +15,7 @@ import com.siqah.InsureRide.dto.ClaimHistoryResponseDTO;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import com.siqah.InsureRide.config.HospitalUserDetails;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public class ClaimController {
 
     @PostMapping("/verify")
     public ResponseEntity<ClaimResponseDTO> verifyClaim(
-        @RequestBody ClaimRequestDTO request
+        @Valid @RequestBody ClaimRequestDTO request
     ){
       UsernamePasswordAuthenticationToken authentication = 
               (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();

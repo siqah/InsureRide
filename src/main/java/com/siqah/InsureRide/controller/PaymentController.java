@@ -14,6 +14,7 @@ import com.siqah.InsureRide.dto.PaymentResponseDTO;
 import com.siqah.InsureRide.entity.Payment;
 
 import java.util.List;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -33,7 +34,7 @@ public class PaymentController {
     //the 20 kes payment endpoint
     @PostMapping("/process")
     public ResponseEntity<PaymentResponseDTO> processPayment(
-            @RequestBody PaymentRequestDTO request){
+            @Valid @RequestBody PaymentRequestDTO request){
                 PaymentResponseDTO response = paymentService.processPayment(request);
                 return ResponseEntity.ok(response);
 

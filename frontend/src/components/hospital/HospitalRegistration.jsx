@@ -17,8 +17,15 @@ const HospitalRegistration = ({ onLoginWithKey }) => {
     setError('');
     setRegisteredKey('');
 
+    const trimmedPhone = phone.trim();
+    if (!/^0\d{9}$/.test(trimmedPhone)) {
+      setError('Phone number must be a valid 10-digit number starting with 0 (e.g., 0712345678)');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await hospitalApi.register(name, email, phone);
+      const response = await hospitalApi.register(name.trim(), email.trim(), trimmedPhone);
       // Backend returns field 'apikey'
       if (response.data?.apikey) {
         setRegisteredKey(response.data.apikey);

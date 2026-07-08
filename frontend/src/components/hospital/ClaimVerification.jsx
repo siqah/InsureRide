@@ -6,6 +6,7 @@ import { ShieldCheckIcon } from '@heroicons/react/24/outline';
 const ClaimVerification = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [amount, setAmount] = useState('');
+  const [localError, setLocalError] = useState('');
   const { verificationResult, loading, error, verifyClaim, clearVerificationResult } = useClaimStore();
 
   useEffect(() => {
@@ -16,8 +17,18 @@ const ClaimVerification = () => {
 
   const handleVerify = async (e) => {
     e.preventDefault();
+    setLocalError('');
+    const trimmedPhone = phoneNumber.trim();
+    if (!/^0\d{9}$/.test(trimmedPhone)) {
+      setLocalError('Phone number must be a valid 10-digit number starting with 0 (e.g., 0712345678)');
+      return;
+    }
+    if (parseFloat(amount) <= 0 || isNaN(parseFloat(amount))) {
+      setLocalError('Bill amount must be greater than zero');
+      return;
+    }
     try {
-      await verifyClaim(phoneNumber, amount);
+      await verifyClaim(trimmedPhone, amount);
     } catch {
       // Handled in store
     }
@@ -73,9 +84,9 @@ const ClaimVerification = () => {
         </button>
       </form>
 
-      {error && (
+      {(localError || error) && (
         <div className="mt-6 p-4 bg-red-50 border border-danger rounded-lg text-danger font-semibold">
-          {error}
+          {localError || error}
         </div>
       )}
 
