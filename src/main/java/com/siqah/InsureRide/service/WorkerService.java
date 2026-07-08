@@ -7,6 +7,9 @@ import com.siqah.InsureRide.dto.WorkerDTO;
 import com.siqah.InsureRide.repository.WorkerRepository;
 import com.siqah.InsureRide.entity.Worker;
 import com.siqah.InsureRide.entity.CoverageStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.siqah.InsureRide.config.JwtService;
+import com.siqah.InsureRide.config.WorkerUserDetails;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,17 +17,29 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor 
 public class WorkerService {
     private final WorkerRepository workerRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     //create an new worker
     public WorkerDTO registerWorker(String name, String phoneNumber){
+        if (workerRepository.findByPhoneNumber(phoneNumber).isPresent()) {
+            throw new RuntimeException("Worker with phone number already registered");
+        }
+
+        // Generate a random 4-digit PIN
+        String rawPin = String.format("%04d", (int) (Math.random() * 10000));
+
         Worker worker = new Worker();
         worker.setName(name);
         worker.setPhoneNumber(phoneNumber);
         worker.setCoverageStatus(CoverageStatus.SUSPENDED);
         worker.setCoverageExpiry(null);
+        worker.setPin(passwordEncoder.encode(rawPin));
 
         Worker saved = workerRepository.save(worker);
-        return convertToDTO(saved);
+        WorkerDTO dto = convertToDTO(saved);
+        dto.setPin(rawPin); // return the generated plain PIN
+        return dto;
     }
 
      // Utility method to convert Entity -> DTO
@@ -68,4 +83,15 @@ public class WorkerService {
 
     }
 
+    //login worker
+    public String login(String phoneNumber, String pin) {
+        Worker worker = workerRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new RuntimeException("Invalid phone number or PIN"));
+
+        if (!passwordEncoder.matches(pin, worker.getPin())) {
+            throw new RuntimeException("Invalid phone number or PIN");
+        }
+
+        return jwtService.generateToken(new WorkerUserDetails(worker));
+    }
 }

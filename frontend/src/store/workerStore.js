@@ -8,6 +8,8 @@ export const useWorkerStore = create((set, get) => ({
   loading: false,
   error: null,
   success: null,
+  token: localStorage.getItem('workerJwtToken') || '',
+  isAuthenticated: !!localStorage.getItem('workerJwtToken'),
 
   fetchWorkerByPhone: async (phoneNumber) => {
     set({ loading: true, error: null, success: null });
@@ -80,6 +82,38 @@ export const useWorkerStore = create((set, get) => ({
   
   clearWorker: () => {
     set({
+      worker: null,
+      payments: [],
+      error: null,
+      success: null,
+    });
+  },
+
+  loginWorker: async (phoneNumber, pin) => {
+    set({ loading: true, error: null, success: null });
+    try {
+      const response = await workerApi.login(phoneNumber, pin);
+      const { token } = response.data;
+      localStorage.setItem('workerJwtToken', token);
+      set({ token, isAuthenticated: true });
+      await get().fetchWorkerByPhone(phoneNumber);
+    } catch (err) {
+      localStorage.removeItem('workerJwtToken');
+      set({
+        token: '',
+        isAuthenticated: false,
+        loading: false,
+        error: err.response?.data?.message || 'Authentication failed. Please check your PIN.',
+      });
+      throw err;
+    }
+  },
+
+  logoutWorker: () => {
+    localStorage.removeItem('workerJwtToken');
+    set({
+      token: '',
+      isAuthenticated: false,
       worker: null,
       payments: [],
       error: null,

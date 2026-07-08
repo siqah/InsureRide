@@ -35,6 +35,8 @@ public class CoverageScheduler {
             workerRepository.save(worker);
             suspendedCount++;
             log.info("Suspended worker: {} - {}", worker.getPhoneNumber(), worker.getName());
+            System.out.printf("📱 [SMS SIMULATOR ALERT] SMS sent to %s (%s): Your daily coverage has expired! Pay 20.00 KES to reactivate.%n",
+                    worker.getName(), worker.getPhoneNumber());
         }
         
         log.info("✅ Suspended {} workers with expired coverage", suspendedCount);
@@ -51,6 +53,8 @@ public class CoverageScheduler {
             for (Worker worker : expiredWorkers) {
                 worker.setCoverageStatus(CoverageStatus.SUSPENDED);
                 workerRepository.save(worker);
+                System.out.printf("📱 [SMS SIMULATOR ALERT] SMS sent to %s (%s): Your daily coverage has expired! Pay 20.00 KES to reactivate.%n",
+                        worker.getName(), worker.getPhoneNumber());
             }
         }
     }

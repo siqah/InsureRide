@@ -11,6 +11,10 @@ export const workerApi = {
   register: (name, phoneNumber) => 
     API.post('/workers/register', { name, phoneNumber }),
   
+  // Login worker
+  login: (phoneNumber, pin) =>
+    API.post('/workers/login', { phoneNumber, pin }),
+
   // Update worker status (sends JSON request body with coverageStatus)
   updateStatus: (workerId, status) => 
     API.put(`/workers/${workerId}/status`, { coverageStatus: status }),

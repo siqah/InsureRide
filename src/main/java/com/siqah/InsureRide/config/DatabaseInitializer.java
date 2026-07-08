@@ -2,6 +2,7 @@ package com.siqah.InsureRide.config;
 
 import com.siqah.InsureRide.entity.*;
 import com.siqah.InsureRide.repository.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ public class DatabaseInitializer implements CommandLineRunner {
     private final HospitalRepository hospitalRepository;
     private final PaymentRepository paymentRepository;
     private final ClaimRepository claimRepository;
+    private final PasswordEncoder passwordEncoder;
     
     @Override
     public void run(String... args) throws Exception {
@@ -31,25 +33,28 @@ public class DatabaseInitializer implements CommandLineRunner {
             worker1.setPhoneNumber("0712345678");
             worker1.setCoverageStatus(CoverageStatus.ACTIVE);
             worker1.setCoverageExpiry(LocalDateTime.now().plusHours(5)); // Expires in 5 hours
+            worker1.setPin(passwordEncoder.encode("1234"));
             
             Worker worker2 = new Worker();
             worker2.setName("Mary Wanjiru");
             worker2.setPhoneNumber("0723456789");
             worker2.setCoverageStatus(CoverageStatus.SUSPENDED);
             worker2.setCoverageExpiry(null);
+            worker2.setPin(passwordEncoder.encode("1234"));
             
             Worker worker3 = new Worker();
             worker3.setName("Peter Ochieng");
             worker3.setPhoneNumber("0734567890");
             worker3.setCoverageStatus(CoverageStatus.ACTIVE);
             worker3.setCoverageExpiry(LocalDateTime.now().plusHours(48)); // Expires in 2 days
+            worker3.setPin(passwordEncoder.encode("1234"));
             
             workerRepository.saveAll(java.util.List.of(worker1, worker2, worker3));
             
             // 2. Create a Hospital
             Hospital hospital = new Hospital();
             hospital.setName("Nairobi General Hospital");
-            hospital.setApikey("TEST-API-KEY-12345");
+            hospital.setApikey(passwordEncoder.encode("1.TEST-API-KEY-12345"));
             hospital.setIsActive(true);
             hospitalRepository.save(hospital);
             

@@ -48,7 +48,14 @@ public class SecurityConfiguration {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/hospitals/login", "/api/hospitals/register").permitAll()
-                .requestMatchers("/api/workers/**", "/api/payments/**").permitAll()
+                .requestMatchers("/api/workers/login", "/api/workers/register").permitAll()
+                .requestMatchers("/api/admin/login").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/claims/**").hasAnyRole("HOSPITAL", "ADMIN")
+                .requestMatchers("/api/workers/phone/{phoneNumber}").hasAnyRole("WORKER", "ADMIN")
+                .requestMatchers("/api/payments/worker/{phoneNumber}").hasAnyRole("WORKER", "ADMIN")
+                .requestMatchers("/api/workers/**").hasRole("ADMIN")
+                .requestMatchers("/api/payments/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow all pre-flight CORS options requests
                 .anyRequest().authenticated()
             )

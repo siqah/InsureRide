@@ -5,6 +5,7 @@ import Footer from './components/common/Footer';
 import LandingPage from './pages/LandingPage';
 import WorkerPortal from './pages/WorkerPortal';
 import HospitalPortal from './pages/HospitalPortal';
+import AdminPortal from './pages/AdminPortal';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/worker" element={<WorkerPortal />} />
             <Route path="/hospital" element={<HospitalPortal />} />
+            <Route path="/admin" element={<AdminPortal />} />
             {/* Fallback route */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

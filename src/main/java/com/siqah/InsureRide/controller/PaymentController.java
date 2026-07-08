@@ -44,8 +44,22 @@ public class PaymentController {
     public ResponseEntity<List<Payment>> getWorkerPayments(
            @PathVariable String phoneNumber
       ){
-        return ResponseEntity.ok(paymentService.getWorkerPayments(phoneNumber));
+        org.springframework.security.authentication.UsernamePasswordAuthenticationToken authentication = 
+                (org.springframework.security.authentication.UsernamePasswordAuthenticationToken) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication == null) {
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
+        }
 
+        String currentUsername = authentication.getName();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin && !currentUsername.equals(phoneNumber)) {
+            return org.springframework.http.ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+
+        return ResponseEntity.ok(paymentService.getWorkerPayments(phoneNumber));
        }
     
 

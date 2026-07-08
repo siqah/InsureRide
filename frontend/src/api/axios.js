@@ -19,14 +19,20 @@ const API = axios.create({
   },
 });
 
-// Request interceptor to add Authorization token for hospital/claims endpoints
+// Request interceptor to add Authorization token based on portal
 API.interceptors.request.use(
   (config) => {
-    if (config.url.includes('/claims') || config.url.includes('/hospitals/me')) {
-      const token = localStorage.getItem('hospitalJwtToken');
-      if (token) {
-        config.headers['Authorization'] = `Bearer ${token}`;
-      }
+    let token = null;
+    if (config.url.includes('/admin')) {
+      token = localStorage.getItem('adminJwtToken');
+    } else if (config.url.includes('/claims') || config.url.includes('/hospitals/me')) {
+      token = localStorage.getItem('hospitalJwtToken');
+    } else if (config.url.includes('/workers') || config.url.includes('/payments')) {
+      token = localStorage.getItem('workerJwtToken') || localStorage.getItem('adminJwtToken');
+    }
+
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config;
   },
@@ -38,8 +44,16 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('hospitalJwtToken');
-      window.location.href = '/hospital'; // Portal page base url
+      if (error.config.url.includes('/admin')) {
+        localStorage.removeItem('adminJwtToken');
+        window.location.href = '/admin';
+      } else if (error.config.url.includes('/claims') || error.config.url.includes('/hospitals')) {
+        localStorage.removeItem('hospitalJwtToken');
+        window.location.href = '/hospital';
+      } else {
+        localStorage.removeItem('workerJwtToken');
+        window.location.href = '/worker';
+      }
     }
     return Promise.reject(error);
   }

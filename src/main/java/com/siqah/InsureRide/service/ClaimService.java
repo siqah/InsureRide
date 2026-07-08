@@ -46,6 +46,10 @@ public class ClaimService {
         }
         claimRepository.save(claim);
 
+        System.out.printf("📱 [SMS SIMULATOR ALERT] SMS sent to %s (%s): A claim for KES %s has been %s. Reason: %s.%n",
+                worker.getName(), worker.getPhoneNumber(), request.getBillAmount(),
+                isCovered ? "APPROVED" : "REJECTED", isCovered ? "Coverage active - claim approved" : "worker suspended or coverage expired");
+
         //4 build and return response
         ClaimResponseDTO response = new ClaimResponseDTO();
         response.setWorkerName(worker.getName());

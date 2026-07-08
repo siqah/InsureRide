@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
 
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import com.siqah.InsureRide.dto.WorkerLoginRequestDTO;
+import com.siqah.InsureRide.dto.LoginResponseDTO;
 import com.siqah.InsureRide.service.WorkerService;
 import com.siqah.InsureRide.dto.WorkerDTO;
 import java.util.Map;
@@ -34,6 +38,12 @@ public class WorkerController {
         return new ResponseEntity<>(worker, HttpStatus.CREATED);
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponseDTO> loginWorker(@Valid @RequestBody WorkerLoginRequestDTO request) {
+        String token = workerService.login(request.getPhoneNumber(), request.getPin());
+        return ResponseEntity.ok(new LoginResponseDTO(token));
+    }
+
     @GetMapping
     public ResponseEntity<List<WorkerDTO>> getAllWorkers(){
         return ResponseEntity.ok(workerService.getAllWorkers());
@@ -41,6 +51,21 @@ public class WorkerController {
 
     @GetMapping("/phone/{phoneNumber}")
     public ResponseEntity<WorkerDTO> getWorkerByphone(@PathVariable String phoneNumber){
+        UsernamePasswordAuthenticationToken authentication = 
+                (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String currentUsername = authentication.getName();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin && !currentUsername.equals(phoneNumber)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         return ResponseEntity.ok(workerService.getWorkerByPhone(phoneNumber));
     }
 
